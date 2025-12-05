@@ -1148,11 +1148,11 @@ class FanFicFarePlugin(InterfaceAction):
             return
 
         id_list = self.gui.library_view.get_selected_ids()
-        
+
         if len(id_list) == 0:
             self.do_status_message(_('No Selected Books for Auto-Update'), 3000)
             return
-        
+
         # Show configuration dialog
         d = AutoUpdateDialog(self.gui,
                             self.qaction.icon(),
@@ -1161,7 +1161,7 @@ class FanFicFarePlugin(InterfaceAction):
         d.exec_()
         if d.result() != d.Accepted:
             return
-        
+
         # Save configuration
         interval = d.get_interval()
         fetch_now = d.get_fetch_now()

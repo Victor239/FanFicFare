@@ -21,7 +21,7 @@ from PyQt5 import QtCore
 from PyQt5.Qt import (QApplication, QDialog, QWidget, QTableWidget, QTableWidgetItem, QVBoxLayout,
                       QHBoxLayout, QGridLayout, QPushButton, QFont, QLabel, QCheckBox, QIcon,
                       QLineEdit, QComboBox, QProgressDialog, QTimer, QDialogButtonBox,
-                      QScrollArea, QPixmap, Qt, QAbstractItemView, QTextEdit,
+                      QScrollArea, QPixmap, Qt, QAbstractItemView, QTextEdit, QSpinBox,
                       pyqtSignal, QGroupBox, QFrame, QTextCursor)
 try:
     # qt6 Calibre v6+
@@ -1813,7 +1813,7 @@ class AutoUpdateDialog(SizePersistedDialog):
         interval_label = QLabel(_('How often should the fictions be fetched (in minutes)?'))
         interval_layout.addWidget(interval_label)
         
-        self.interval_input = QtGui.QSpinBox(self)
+        self.interval_input = QSpinBox(self)
         self.interval_input.setMinimum(1)
         self.interval_input.setMaximum(9999)
         self.interval_input.setValue(prefs.get('auto_update_interval', 60))
