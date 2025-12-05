@@ -107,7 +107,7 @@ from calibre_plugins.fanficfare_plugin.prefs import (
     SAVE_YES_UNLESS_IMG)
 
 from calibre_plugins.fanficfare_plugin.dialogs import (
-    AddNewDialog, UpdateExistingDialog,
+    AddNewDialog, UpdateExistingDialog, AutoUpdateDialog,
     LoopProgressDialog, UserPassDialog, AboutDialog, CollectURLDialog,
     RejectListDialog, EmailPassDialog, TOTPDialog,
     save_collisions, question_dialog_all,
@@ -195,6 +195,9 @@ class FanFicFarePlugin(InterfaceAction):
 
         self.imap_pass = None
         self.download_job_manager = DownloadJobManager()
+        
+        # Initialize auto-update timer
+        self.auto_update_timer = None
 
     def initialization_complete(self):
         # otherwise configured hot keys won't work until the menu's
@@ -204,6 +207,10 @@ class FanFicFarePlugin(InterfaceAction):
         self.add_new_dialog = AddNewDialog(self.gui,
                                            prefs,
                                            self.qaction.icon())
+        
+        # Start auto-update timer if it was previously enabled
+        if prefs.get('auto_update_enabled', False):
+            self.start_auto_update_timer()
 
     ## Kludgey, yes, but with the real configuration inside the
     ## library now, how else would a user be able to change this
@@ -292,6 +299,10 @@ class FanFicFarePlugin(InterfaceAction):
             self.update_action = self.create_menu_item_ex(self.menu, _('&Update Existing FanFiction Books'), image='plusplus.png',
                                                           unique_name='&Update Existing FanFiction Books',
                                                           triggered=self.update_dialog)
+
+            self.auto_update_action = self.create_menu_item_ex(self.menu, _('&Automatically Update Existing FanFiction Books'), image='plusplus.png',
+                                                               unique_name='&Automatically Update Existing FanFiction Books',
+                                                               triggered=self.auto_update_dialog)
 
             self.get_list_imap_action = self.create_menu_item_ex(self.menu, _('Get Story URLs from &Email'), image='view.png',
                                                                  unique_name='Get Story URLs from IMAP',
@@ -1123,6 +1134,90 @@ class FanFicFarePlugin(InterfaceAction):
         if any(x['good'] for x in update_books):
             options = d.get_fff_options()
             self.prep_downloads( options, update_books )
+
+    def auto_update_dialog(self, checked):
+        '''Show dialog to configure automatic updates for selected books'''
+        if not self.is_library_view():
+            self.do_status_message(_('Cannot Auto-Update Books from Device View'), 3000)
+            return
+
+        id_list = self.gui.library_view.get_selected_ids()
+        
+        if len(id_list) == 0:
+            self.do_status_message(_('No Selected Books for Auto-Update'), 3000)
+            return
+        
+        # Show configuration dialog
+        d = AutoUpdateDialog(self.gui,
+                            self.qaction.icon(),
+                            prefs,
+                            len(id_list))
+        d.exec_()
+        if d.result() != d.Accepted:
+            return
+        
+        # Save configuration
+        interval = d.get_interval()
+        fetch_now = d.get_fetch_now()
+        
+        prefs['auto_update_enabled'] = True
+        prefs['auto_update_interval'] = interval
+        prefs['auto_update_book_ids'] = id_list
+        
+        # Start the timer
+        self.start_auto_update_timer()
+        
+        # If fetch immediately is checked, trigger an update now
+        if fetch_now:
+            self.update_dialog(False, id_list=id_list)
+        
+        self.do_status_message(_('Automatic updates configured for %d book(s) every %d minutes') % 
+                              (len(id_list), interval), 5000)
+
+    def start_auto_update_timer(self):
+        '''Start or restart the auto-update timer'''
+        # Stop existing timer if running
+        if self.auto_update_timer is not None:
+            self.auto_update_timer.stop()
+            self.auto_update_timer = None
+        
+        if not prefs.get('auto_update_enabled', False):
+            return
+        
+        interval = prefs.get('auto_update_interval', 60)
+        
+        # Create and start timer
+        self.auto_update_timer = QTimer()
+        self.auto_update_timer.timeout.connect(self.auto_update_books)
+        self.auto_update_timer.start(interval * 60 * 1000)  # Convert minutes to milliseconds
+        
+        logger.info("Auto-update timer started with interval: %d minutes" % interval)
+
+    def stop_auto_update_timer(self):
+        '''Stop the auto-update timer'''
+        if self.auto_update_timer is not None:
+            self.auto_update_timer.stop()
+            self.auto_update_timer = None
+        
+        prefs['auto_update_enabled'] = False
+        logger.info("Auto-update timer stopped")
+
+    def auto_update_books(self):
+        '''Callback function when the timer triggers'''
+        if not prefs.get('auto_update_enabled', False):
+            self.stop_auto_update_timer()
+            return
+        
+        book_ids = prefs.get('auto_update_book_ids', [])
+        
+        if not book_ids:
+            logger.warning("Auto-update triggered but no book IDs configured")
+            return
+        
+        logger.info("Auto-update triggered for %d books" % len(book_ids))
+        
+        # Trigger update for the configured books
+        self.update_dialog(False, id_list=book_ids)
 
     def get_urls_clip(self,storyurls=True):
         url_list = []
