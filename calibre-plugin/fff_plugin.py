@@ -1239,11 +1239,8 @@ class FanFicFarePlugin(InterfaceAction):
             return
         
         # Check if there are any ongoing update jobs
-        has_running_jobs = False
-        for batch_key, batch in self.download_job_manager.batches.items():
-            if not batch.all_done():
-                has_running_jobs = True
-                break
+        has_running_jobs = any(not batch.all_done() 
+                              for batch in self.download_job_manager.batches.values())
         
         if has_running_jobs:
             # Show notification that auto-update failed due to ongoing jobs
@@ -1271,7 +1268,7 @@ class FanFicFarePlugin(InterfaceAction):
             return
         
         db = self.gui.current_db
-        books = [ self.make_book_id_only(x) for x in id_list ]
+        books = [self.make_book_id_only(x) for x in id_list]
         
         for j, book in enumerate(books):
             book['listorder'] = j
