@@ -1299,6 +1299,7 @@ class FanFicFarePlugin(InterfaceAction):
             'bgmeta': prefs['bgmeta'],
             'smarten_punctuation': prefs['smarten_punctuation'],
             'do_wordcount': prefs['do_wordcount'],
+            'auto_update': True,  # Flag to indicate this is an automatic update
         }
         
         # Validate and adjust collision settings if needed
@@ -1944,6 +1945,15 @@ class FanFicFarePlugin(InterfaceAction):
         else:
             ## No good stories to try to download, go straight to
             ## updating error col.
+            
+            # For auto-update, proceed silently
+            if options.get('auto_update', False):
+                logger.info("Auto-update: No good stories to download, updating error column silently")
+                payload = ([], book_list, options)
+                self.update_error_column(payload)
+                self.download_finished_signal.emit()
+                return
+            
             msgl = [
                 _('None of the <b>%d</b> URLs/stories given can be/need to be downloaded.')%len(book_list),
                 _('See log for details.'),
@@ -2257,6 +2267,23 @@ class FanFicFarePlugin(InterfaceAction):
         bad_list = sorted(bad_list,key=sort_func)
 
         payload = (good_list, bad_list, options)
+
+        # Check if this is an auto-update - if so, proceed silently
+        if options.get('auto_update', False):
+            logger.info("Auto-update completing silently: %d good, %d bad" % (len(good_list), len(bad_list)))
+            if merge:
+                if len(good_list) < 1:
+                    logger.info("Auto-update: No good stories for anthology, aborting")
+                    return
+                do_update_func = self.do_download_merge_update
+            else:
+                do_update_func = self.do_download_list_update
+            
+            # Proceed automatically without user confirmation
+            do_update_func(payload)
+            # Emit signal for Action Chains
+            self.download_finished_signal.emit()
+            return
 
         msgl = [ _('FanFicFare found <b>%s</b> good and <b>%s</b> bad updates.')%(len(good_list),len(bad_list)) ]
         if chapter_error_list:
