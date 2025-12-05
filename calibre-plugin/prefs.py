@@ -197,6 +197,9 @@ default_prefs['auto_reject_from_email'] = False
 default_prefs['update_existing_only_from_email'] = False
 default_prefs['download_from_email_immediately'] = False
 
+default_prefs['auto_update_enabled'] = False
+default_prefs['auto_update_interval'] = 60 # in minutes
+default_prefs['auto_update_book_ids'] = [] # list of book IDs to auto-update
 
 #default_prefs['single_proc_jobs'] = True # setting and code removed
 default_prefs['site_split_jobs'] = True

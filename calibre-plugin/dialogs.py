@@ -21,7 +21,7 @@ from PyQt5 import QtCore
 from PyQt5.Qt import (QApplication, QDialog, QWidget, QTableWidget, QTableWidgetItem, QVBoxLayout,
                       QHBoxLayout, QGridLayout, QPushButton, QFont, QLabel, QCheckBox, QIcon,
                       QLineEdit, QComboBox, QProgressDialog, QTimer, QDialogButtonBox,
-                      QScrollArea, QPixmap, Qt, QAbstractItemView, QTextEdit,
+                      QScrollArea, QPixmap, Qt, QAbstractItemView, QTextEdit, QSpinBox,
                       pyqtSignal, QGroupBox, QFrame, QTextCursor)
 try:
     # qt6 Calibre v6+
@@ -1772,3 +1772,79 @@ def question_dialog_all(parent, title, msg, det_msg='', show_copy_button=False,
         gprefs.set('questions_to_auto_skip', list(auto_skip))
 
     return ret
+
+class AutoUpdateDialog(SizePersistedDialog):
+    '''Dialog for configuring automatic updates'''
+    
+    def __init__(self, gui, icon, prefs, book_count, 
+                 save_size_name='fff:auto update dialog'):
+        SizePersistedDialog.__init__(self, gui, save_size_name)
+        
+        self.prefs = prefs
+        self.setWindowTitle(_('Automatically Update Existing FanFiction Books'))
+        self.setWindowIcon(icon)
+        
+        layout = QVBoxLayout(self)
+        self.setLayout(layout)
+        
+        # Title section
+        title_layout = ImageTitleLayout(self, 'images/icon.png',
+                                        _('Configure Automatic Updates'))
+        layout.addLayout(title_layout)
+        
+        # Info label
+        info_label = QLabel(_('Configure automatic updates for %d selected book(s)') % book_count)
+        layout.addWidget(info_label)
+        
+        # Show current status if auto-update is enabled
+        if prefs['auto_update_enabled']:
+            current_interval = prefs['auto_update_interval']
+            current_book_count = len(prefs['auto_update_book_ids'])
+            status_label = QLabel(_('<b>Current Status:</b> Auto-update is active for %d book(s) every %d minutes.<br/>'
+                                   'Configuring new settings will replace the existing auto-update.') % 
+                                 (current_book_count, current_interval))
+            status_label.setWordWrap(True)
+            layout.addWidget(status_label)
+        
+        layout.addSpacing(10)
+        
+        # Interval input
+        interval_layout = QHBoxLayout()
+        interval_label = QLabel(_('How often should the fictions be fetched (in minutes)?'))
+        interval_layout.addWidget(interval_label)
+        
+        self.interval_input = QSpinBox(self)
+        self.interval_input.setMinimum(1)
+        self.interval_input.setMaximum(9999)
+        self.interval_input.setValue(prefs['auto_update_interval'])
+        self.interval_input.setToolTip(_('Interval in minutes between automatic updates (1-9999)'))
+        interval_layout.addWidget(self.interval_input)
+        
+        interval_layout.addStretch()
+        layout.addLayout(interval_layout)
+        
+        layout.addSpacing(10)
+        
+        # Fetch immediately checkbox
+        self.fetch_now_checkbox = QCheckBox(_('Fetch immediately now?'), self)
+        self.fetch_now_checkbox.setChecked(True)
+        self.fetch_now_checkbox.setToolTip(_('Start the first update immediately'))
+        layout.addWidget(self.fetch_now_checkbox)
+        
+        layout.addSpacing(20)
+        
+        # Button box
+        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        button_box.accepted.connect(self.accept)
+        button_box.rejected.connect(self.reject)
+        layout.addWidget(button_box)
+        
+        self.resize_dialog()
+    
+    def get_interval(self):
+        '''Returns the interval in minutes'''
+        return self.interval_input.value()
+    
+    def get_fetch_now(self):
+        '''Returns whether to fetch immediately'''
+        return self.fetch_now_checkbox.isChecked()
