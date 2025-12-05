@@ -1238,10 +1238,80 @@ class FanFicFarePlugin(InterfaceAction):
             logger.warning("Auto-update triggered but no book IDs configured")
             return
         
+        # Check if there are any ongoing update jobs
+        has_running_jobs = False
+        for batch_key, batch in self.download_job_manager.batches.items():
+            if not batch.all_done():
+                has_running_jobs = True
+                break
+        
+        if has_running_jobs:
+            # Show notification that auto-update failed due to ongoing jobs
+            info_dialog(self.gui, 
+                       _('FanFicFare Automatic Update'),
+                       _('FanFicFare automatic update failed - there already is an ongoing update'),
+                       show=True,
+                       show_copy_button=False)
+            logger.info("Auto-update skipped - ongoing update job detected")
+            return
+        
         logger.info("Auto-update triggered for %d books" % len(book_ids))
         
-        # Trigger update for the configured books
-        self.update_dialog(False, id_list=book_ids)
+        # Perform automatic update without showing dialog
+        self.auto_update_books_silently(book_ids)
+
+    def auto_update_books_silently(self, id_list):
+        '''Automatically update books without user interaction'''
+        if not self.is_library_view():
+            logger.warning("Auto-update skipped - not in library view")
+            return
+        
+        if len(id_list) == 0:
+            logger.warning("Auto-update skipped - no books to update")
+            return
+        
+        # Use default options for automatic updates
+        extraoptions = {}
+        
+        db = self.gui.current_db
+        books = [ self.make_book_id_only(x) for x in id_list ]
+        
+        for j, book in enumerate(books):
+            book['listorder'] = j
+        
+        # Collect book information
+        LoopProgressDialog(self.gui,
+                           books,
+                           partial(self.populate_book_from_calibre_id, db=self.gui.current_db),
+                           partial(self.auto_update_finish, extraoptions=extraoptions),
+                           init_label=_("Collecting stories for automatic update..."),
+                           win_title=_("FanFicFare Automatic Update"),
+                           status_prefix=_("URL retrieved"))
+    
+    def auto_update_finish(self, book_list, extraoptions={}):
+        '''Finish automatic update without showing dialog'''
+        # Filter to only good books
+        update_books = [book for book in book_list if book.get('good', False)]
+        
+        if not update_books:
+            logger.info("Auto-update finished - no valid books to update")
+            return
+        
+        # Use default options from preferences
+        options = {
+            'fileform': prefs['fileform'],
+            'collision': save_collisions[prefs['collision']],
+            'updatemeta': prefs['updatemeta'],
+            'bgmeta': prefs['bgmeta'],
+            'smarten_punctuation': prefs['smarten_punctuation'],
+            'do_wordcount': prefs['do_wordcount'],
+        }
+        
+        logger.info("Auto-update starting download for %d books with options: %s" % (len(update_books), options))
+        
+        # Start the downloads
+        self.prep_downloads(options, update_books)
+
 
     def get_urls_clip(self,storyurls=True):
         url_list = []
