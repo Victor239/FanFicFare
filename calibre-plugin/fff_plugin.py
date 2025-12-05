@@ -1270,9 +1270,6 @@ class FanFicFarePlugin(InterfaceAction):
             logger.warning("Auto-update skipped - no books to update")
             return
         
-        # Use default options for automatic updates
-        extraoptions = {}
-        
         db = self.gui.current_db
         books = [ self.make_book_id_only(x) for x in id_list ]
         
@@ -1283,12 +1280,12 @@ class FanFicFarePlugin(InterfaceAction):
         LoopProgressDialog(self.gui,
                            books,
                            partial(self.populate_book_from_calibre_id, db=self.gui.current_db),
-                           partial(self.auto_update_finish, extraoptions=extraoptions),
+                           self.auto_update_finish,
                            init_label=_("Collecting stories for automatic update..."),
                            win_title=_("FanFicFare Automatic Update"),
                            status_prefix=_("URL retrieved"))
     
-    def auto_update_finish(self, book_list, extraoptions={}):
+    def auto_update_finish(self, book_list):
         '''Finish automatic update without showing dialog'''
         # Filter to only good books
         update_books = [book for book in book_list if book.get('good', False)]
@@ -1297,7 +1294,7 @@ class FanFicFarePlugin(InterfaceAction):
             logger.info("Auto-update finished - no valid books to update")
             return
         
-        # Use default options from preferences
+        # Build options from preferences with validation
         options = {
             'fileform': prefs['fileform'],
             'collision': save_collisions[prefs['collision']],
@@ -1306,6 +1303,9 @@ class FanFicFarePlugin(InterfaceAction):
             'smarten_punctuation': prefs['smarten_punctuation'],
             'do_wordcount': prefs['do_wordcount'],
         }
+        
+        # Validate and adjust collision settings if needed
+        self.check_valid_collision(options)
         
         logger.info("Auto-update starting download for %d books with options: %s" % (len(update_books), options))
         
