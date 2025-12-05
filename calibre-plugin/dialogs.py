@@ -1797,9 +1797,9 @@ class AutoUpdateDialog(SizePersistedDialog):
         layout.addWidget(info_label)
         
         # Show current status if auto-update is enabled
-        if prefs.get('auto_update_enabled', False):
-            current_interval = prefs.get('auto_update_interval', 60)
-            current_book_count = len(prefs.get('auto_update_book_ids', []))
+        if prefs['auto_update_enabled']:
+            current_interval = prefs['auto_update_interval']
+            current_book_count = len(prefs['auto_update_book_ids'])
             status_label = QLabel(_('<b>Current Status:</b> Auto-update is active for %d book(s) every %d minutes.<br/>'
                                    'Configuring new settings will replace the existing auto-update.') % 
                                  (current_book_count, current_interval))
@@ -1816,7 +1816,7 @@ class AutoUpdateDialog(SizePersistedDialog):
         self.interval_input = QSpinBox(self)
         self.interval_input.setMinimum(1)
         self.interval_input.setMaximum(9999)
-        self.interval_input.setValue(prefs.get('auto_update_interval', 60))
+        self.interval_input.setValue(prefs['auto_update_interval'])
         self.interval_input.setToolTip(_('Interval in minutes between automatic updates (1-9999)'))
         interval_layout.addWidget(self.interval_input)
         

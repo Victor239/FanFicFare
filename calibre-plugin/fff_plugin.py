@@ -207,7 +207,7 @@ class FanFicFarePlugin(InterfaceAction):
                                            prefs,
                                            self.qaction.icon())
         # Start auto-update timer if it was previously enabled
-        if prefs.get('auto_update_enabled', False):
+        if prefs['auto_update_enabled']:
             self.start_auto_update_timer()
 
     ## Kludgey, yes, but with the real configuration inside the
@@ -305,7 +305,7 @@ class FanFicFarePlugin(InterfaceAction):
             self.stop_auto_update_action = self.create_menu_item_ex(self.menu, _('Stop Automatic Updates'), image='minus.png',
                                                                     unique_name='Stop Automatic Updates',
                                                                     triggered=self.stop_auto_update_dialog)
-            self.stop_auto_update_action.setVisible(prefs.get('auto_update_enabled', False))
+            self.stop_auto_update_action.setVisible(prefs['auto_update_enabled'])
 
             self.get_list_imap_action = self.create_menu_item_ex(self.menu, _('Get Story URLs from &Email'), image='view.png',
                                                                  unique_name='Get Story URLs from IMAP',
@@ -1182,7 +1182,7 @@ class FanFicFarePlugin(InterfaceAction):
 
     def stop_auto_update_dialog(self, checked):
         '''Stop automatic updates'''
-        if not prefs.get('auto_update_enabled', False):
+        if not prefs['auto_update_enabled']:
             self.do_status_message(_('Automatic updates are not currently enabled'), 3000)
             return
         
@@ -1205,10 +1205,10 @@ class FanFicFarePlugin(InterfaceAction):
             self.auto_update_timer.stop()
             self.auto_update_timer = None
         
-        if not prefs.get('auto_update_enabled', False):
+        if not prefs['auto_update_enabled']:
             return
         
-        interval = prefs.get('auto_update_interval', 60)
+        interval = prefs['auto_update_interval']
         
         # Create and start timer
         self.auto_update_timer = QTimer()
@@ -1228,11 +1228,11 @@ class FanFicFarePlugin(InterfaceAction):
 
     def auto_update_books(self):
         '''Callback function when the timer triggers'''
-        if not prefs.get('auto_update_enabled', False):
+        if not prefs['auto_update_enabled']:
             self.stop_auto_update_timer()
             return
         
-        book_ids = prefs.get('auto_update_book_ids', [])
+        book_ids = prefs['auto_update_book_ids']
         
         if not book_ids:
             logger.warning("Auto-update triggered but no book IDs configured")
