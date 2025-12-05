@@ -195,7 +195,6 @@ class FanFicFarePlugin(InterfaceAction):
 
         self.imap_pass = None
         self.download_job_manager = DownloadJobManager()
-        
         # Initialize auto-update timer
         self.auto_update_timer = None
 
@@ -207,7 +206,6 @@ class FanFicFarePlugin(InterfaceAction):
         self.add_new_dialog = AddNewDialog(self.gui,
                                            prefs,
                                            self.qaction.icon())
-        
         # Start auto-update timer if it was previously enabled
         if prefs.get('auto_update_enabled', False):
             self.start_auto_update_timer()
@@ -303,7 +301,6 @@ class FanFicFarePlugin(InterfaceAction):
             self.auto_update_action = self.create_menu_item_ex(self.menu, _('&Automatically Update Existing FanFiction Books'), image='plusplus.png',
                                                                unique_name='&Automatically Update Existing FanFiction Books',
                                                                triggered=self.auto_update_dialog)
-            
             # Add stop auto-update action, only visible if auto-update is enabled
             self.stop_auto_update_action = self.create_menu_item_ex(self.menu, _('Stop Automatic Updates'), image='minus.png',
                                                                     unique_name='Stop Automatic Updates',
