@@ -303,6 +303,12 @@ class FanFicFarePlugin(InterfaceAction):
             self.auto_update_action = self.create_menu_item_ex(self.menu, _('&Automatically Update Existing FanFiction Books'), image='plusplus.png',
                                                                unique_name='&Automatically Update Existing FanFiction Books',
                                                                triggered=self.auto_update_dialog)
+            
+            # Add stop auto-update action, only visible if auto-update is enabled
+            self.stop_auto_update_action = self.create_menu_item_ex(self.menu, _('Stop Automatic Updates'), image='minus.png',
+                                                                    unique_name='Stop Automatic Updates',
+                                                                    triggered=self.stop_auto_update_dialog)
+            self.stop_auto_update_action.setVisible(prefs.get('auto_update_enabled', False))
 
             self.get_list_imap_action = self.create_menu_item_ex(self.menu, _('Get Story URLs from &Email'), image='view.png',
                                                                  unique_name='Get Story URLs from IMAP',
@@ -1173,6 +1179,27 @@ class FanFicFarePlugin(InterfaceAction):
         
         self.do_status_message(_('Automatic updates configured for %d book(s) every %d minutes') % 
                               (len(id_list), interval), 5000)
+        
+        # Update menu visibility
+        self.rebuild_menus()
+
+    def stop_auto_update_dialog(self, checked):
+        '''Stop automatic updates'''
+        if not prefs.get('auto_update_enabled', False):
+            self.do_status_message(_('Automatic updates are not currently enabled'), 3000)
+            return
+        
+        # Confirm with user
+        from calibre.gui2 import question_dialog
+        if question_dialog(self.gui, 
+                          _('Stop Automatic Updates'),
+                          _('Are you sure you want to stop automatic updates?'),
+                          skip_dialog_name='fanficfare_stop_auto_update'):
+            self.stop_auto_update_timer()
+            self.do_status_message(_('Automatic updates stopped'), 3000)
+            
+            # Update menu visibility
+            self.rebuild_menus()
 
     def start_auto_update_timer(self):
         '''Start or restart the auto-update timer'''

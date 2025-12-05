@@ -1796,6 +1796,16 @@ class AutoUpdateDialog(SizePersistedDialog):
         info_label = QLabel(_('Configure automatic updates for %d selected book(s)') % book_count)
         layout.addWidget(info_label)
         
+        # Show current status if auto-update is enabled
+        if prefs.get('auto_update_enabled', False):
+            current_interval = prefs.get('auto_update_interval', 60)
+            current_book_count = len(prefs.get('auto_update_book_ids', []))
+            status_label = QLabel(_('<b>Current Status:</b> Auto-update is active for %d book(s) every %d minutes.<br/>'
+                                   'Configuring new settings will replace the existing auto-update.') % 
+                                 (current_book_count, current_interval))
+            status_label.setWordWrap(True)
+            layout.addWidget(status_label)
+        
         layout.addSpacing(10)
         
         # Interval input
