@@ -135,7 +135,7 @@ PLUGIN_ICONS = ['images/icon.png']
 
 class FanFicFarePlugin(InterfaceAction):
 
-    name = 'FanFicFare'
+    name = 'AutomatedFanFicFare'
 
     # Declare the main action associated with this plugin
     # The keyboard shortcut can be None if you dont want to use a keyboard
