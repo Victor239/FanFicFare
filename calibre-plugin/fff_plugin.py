@@ -70,7 +70,7 @@ except:
 from calibre.library.field_metadata import FieldMetadata
 field_metadata = FieldMetadata()
 
-from calibre_plugins.fanficfare_plugin.common_utils import (
+from calibre_plugins.automatedfanficfare_plugin.common_utils import (
     set_plugin_icon_resources, get_icon, create_menu_action_unique,
     busy_cursor)
 
@@ -84,14 +84,14 @@ from fanficfare.geturls import (
     get_urls_from_page, get_urls_from_text,get_urls_from_imap,
     get_urls_from_mime)
 
-from calibre_plugins.fanficfare_plugin.fff_util import (
+from calibre_plugins.automatedfanficfare_plugin.fff_util import (
     get_fff_adapter, get_fff_config, get_fff_personalini,
     get_common_elements)
 
-from calibre_plugins.fanficfare_plugin.config import (
+from calibre_plugins.automatedfanficfare_plugin.config import (
     permitted_values, rejecturllist, STD_COLS_SKIP)
 
-from calibre_plugins.fanficfare_plugin.prefs import (
+from calibre_plugins.automatedfanficfare_plugin.prefs import (
     prefs,
     SKIP,
     ADDNEW,
@@ -106,7 +106,7 @@ from calibre_plugins.fanficfare_plugin.prefs import (
     SAVE_YES_IF_IMG,
     SAVE_YES_UNLESS_IMG)
 
-from calibre_plugins.fanficfare_plugin.dialogs import (
+from calibre_plugins.automatedfanficfare_plugin.dialogs import (
     AddNewDialog, UpdateExistingDialog, AutoUpdateDialog,
     LoopProgressDialog, UserPassDialog, AboutDialog, CollectURLDialog,
     RejectListDialog, EmailPassDialog, TOTPDialog,
@@ -1977,7 +1977,7 @@ class FanFicFarePlugin(InterfaceAction):
         # get libs from plugin zip.
         options['plugin_path'] = self.interface_action_base_plugin.plugin_path
 
-        args = ['calibre_plugins.fanficfare_plugin.jobs',
+        args = ['calibre_plugins.automatedfanficfare_plugin.jobs',
                 'do_download_worker_single',
                 (site, book_list, options, merge)]
         if site:

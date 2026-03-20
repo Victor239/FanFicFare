@@ -63,18 +63,18 @@ no_trans = { 'pini':'personal.ini',
 
 STD_COLS_SKIP = ['size','cover','news','ondevice','path','series_sort','sort']
 
-from calibre_plugins.fanficfare_plugin.prefs import (
+from calibre_plugins.automatedfanficfare_plugin.prefs import (
     prefs, rejects_data, PREFS_NAMESPACE, prefs_save_options,
     updatecalcover_order, gencalcover_order, do_wordcount_order,
     SAVE_YES, SAVE_NO)
 
-from calibre_plugins.fanficfare_plugin.dialogs import (
+from calibre_plugins.automatedfanficfare_plugin.dialogs import (
     UPDATE, UPDATEALWAYS, collision_order, save_collisions, RejectListDialog,
     EditTextDialog, IniTextDialog, RejectUrlEntry)
 
 from fanficfare.adapters import getSiteSections, get_section_url
 
-from calibre_plugins.fanficfare_plugin.common_utils import (
+from calibre_plugins.automatedfanficfare_plugin.common_utils import (
     KeyboardConfigDialog, PrefsViewerDialog, busy_cursor )
 
 

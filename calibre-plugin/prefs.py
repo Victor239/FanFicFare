@@ -20,8 +20,8 @@ try:
 except NameError:
     pass # load_translations() added in calibre 1.9
 
-from calibre_plugins.fanficfare_plugin import __version__ as plugin_version
-from calibre_plugins.fanficfare_plugin.common_utils import get_library_uuid
+from calibre_plugins.automatedfanficfare_plugin import __version__ as plugin_version
+from calibre_plugins.automatedfanficfare_plugin.common_utils import get_library_uuid
 
 SKIP=_('Skip')
 ADDNEW=_('Add New Book')

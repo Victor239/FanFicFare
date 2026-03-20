@@ -128,20 +128,20 @@ def do_download_for_worker(book,options,merge,notification=lambda x,y:x):
     Child job, to download story when run as a worker job
     '''
 
-    from calibre_plugins.fanficfare_plugin import FanFicFareBase
+    from calibre_plugins.automatedfanficfare_plugin import FanFicFareBase
     fffbase = FanFicFareBase(options['plugin_path'])
     with fffbase: # so the sys.path was modified while loading the
                   # plug impl.
-        from calibre_plugins.fanficfare_plugin.dialogs import NotGoingToDownload
-        from calibre_plugins.fanficfare_plugin.prefs import (
+        from calibre_plugins.automatedfanficfare_plugin.dialogs import NotGoingToDownload
+        from calibre_plugins.automatedfanficfare_plugin.prefs import (
                 SAVE_YES, SAVE_YES_UNLESS_SITE, OVERWRITE, OVERWRITEALWAYS, UPDATE,
                 UPDATEALWAYS, ADDNEW, SKIP, CALIBREONLY, CALIBREONLYSAVECOL)
-        from calibre_plugins.fanficfare_plugin.wordcount import get_word_count
+        from calibre_plugins.automatedfanficfare_plugin.wordcount import get_word_count
         from fanficfare import adapters, writers
         from fanficfare.epubutils import get_update_data
         from fanficfare.six import text_type as unicode
 
-        from calibre_plugins.fanficfare_plugin.fff_util import get_fff_config
+        from calibre_plugins.automatedfanficfare_plugin.fff_util import get_fff_config
 
         try:
             logger.info("\n\n" + ("-"*80) + " " + book['url'])

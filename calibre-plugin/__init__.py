@@ -47,7 +47,7 @@ class FanFicFareBase(InterfaceActionBase):
     The reason for having two classes is that it allows the command line
     calibre utilities to run without needing to load the GUI libraries.
     '''
-    name                = 'FanFicFare'
+    name                = 'AutomatedFanFicFare'
     description         = _('UI plugin to download FanFiction stories from various sites.')
     supported_platforms = ['windows', 'osx', 'linux']
     author              = 'Jim Miller'
@@ -57,7 +57,7 @@ class FanFicFareBase(InterfaceActionBase):
     #: This field defines the GUI plugin class that contains all the code
     #: that actually does something. Its format is module_path:class_name
     #: The specified class must be defined in the specified module.
-    actual_plugin       = 'calibre_plugins.fanficfare_plugin.fff_plugin:FanFicFarePlugin'
+    actual_plugin       = 'calibre_plugins.automatedfanficfare_plugin.fff_plugin:FanFicFarePlugin'
 
     def is_customizable(self):
         '''
@@ -88,7 +88,7 @@ class FanFicFareBase(InterfaceActionBase):
         # top of the module as importing the config class will also cause the
         # GUI libraries to be loaded, which we do not want when using calibre
         # from the command line
-        from calibre_plugins.fanficfare_plugin.config import ConfigWidget
+        from calibre_plugins.automatedfanficfare_plugin.config import ConfigWidget
         return ConfigWidget(self.actual_plugin_)
 
     def save_settings(self, config_widget):
@@ -111,7 +111,7 @@ class FanFicFareBase(InterfaceActionBase):
             # Make sure the fanficfare module is available globally
             # under its simple name, -- This is the only reason other
             # plugin files can import fanficfare instead of
-            # calibre_plugins.fanficfare_plugin.fanficfare.
+            # calibre_plugins.automatedfanficfare_plugin.fanficfare.
             #
             # Added specifically for the benefit of
             # eli-schwartz/eschwartz's Arch Linux distro that wants to
@@ -127,7 +127,7 @@ class FanFicFareBase(InterfaceActionBase):
             # CLI--it would load everytime anyway.
             from calibre.library import db
             from fanficfare.cli import main as fff_main
-            from calibre_plugins.fanficfare_plugin.prefs import PrefsFacade
+            from calibre_plugins.automatedfanficfare_plugin.prefs import PrefsFacade
             from fanficfare.six import ensure_text
             from optparse import OptionParser
 

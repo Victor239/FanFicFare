@@ -46,7 +46,7 @@ try:
 except NameError:
     pass # load_translations() added in calibre 1.9
 
-from calibre_plugins.fanficfare_plugin.common_utils import (
+from calibre_plugins.automatedfanficfare_plugin.common_utils import (
     ReadOnlyTableWidgetItem, ReadOnlyTextIconWidgetItem,
     SizePersistedDialog, EditableTableWidgetItem,
     ImageTitleLayout, get_icon)
@@ -61,7 +61,7 @@ from fanficfare.configurable import (
 from .inihighlighter import IniHighlighter
 
 ## moved to prefs.py so they can be included in jobs.py.
-from calibre_plugins.fanficfare_plugin.prefs import (
+from calibre_plugins.automatedfanficfare_plugin.prefs import (
     SKIP,
     ADDNEW,
     UPDATE,
@@ -731,7 +731,7 @@ class _LoopProgressDialog(QProgressDialog):
         self.start_time = datetime.now()
 
         # can't import at file load.
-        from calibre_plugins.fanficfare_plugin.prefs import prefs
+        from calibre_plugins.automatedfanficfare_plugin.prefs import prefs
         self.show_est_time = prefs['show_est_time']
 
         self.setLabelText('%s %d / %d' % (self.status_prefix, self.i, len(self.book_list)))
@@ -1483,7 +1483,7 @@ class RejectListDialog(SizePersistedDialog):
 
         if show_delete:
             # can't import at file load.
-            from calibre_plugins.fanficfare_plugin.prefs import prefs
+            from calibre_plugins.automatedfanficfare_plugin.prefs import prefs
 
             self.deletebooks = QCheckBox(_('Delete Books (including books without FanFiction URLs)?'),self)
             self.deletebooks.setToolTip(_("Delete the selected books after adding them to the Rejected URLs list."))
