@@ -128,8 +128,8 @@ def do_download_for_worker(book,options,merge,notification=lambda x,y:x):
     Child job, to download story when run as a worker job
     '''
 
-    from calibre_plugins.automatedfanficfare_plugin import FanFicFareBase
-    fffbase = FanFicFareBase(options['plugin_path'])
+    from calibre_plugins.automatedfanficfare_plugin import AutomatedFanFicFareBase
+    fffbase = AutomatedFanFicFareBase(options['plugin_path'])
     with fffbase: # so the sys.path was modified while loading the
                   # plug impl.
         from calibre_plugins.automatedfanficfare_plugin.dialogs import NotGoingToDownload
@@ -299,7 +299,7 @@ def do_download_for_worker(book,options,merge,notification=lambda x,y:x):
                     elif chaptercount > urlchaptercount and not (book['collision'] == UPDATEALWAYS and adapter.getConfig('force_update_epub_always')):
                         raise NotGoingToDownload(_("Existing epub contains %d chapters, web site only has %d. Use Overwrite or force_update_epub_always to force update.") % (chaptercount,urlchaptercount),'dialog_error.png')
                     elif chaptercount == 0:
-                        raise NotGoingToDownload(_("FanFicFare doesn't recognize chapters in existing epub, epub is probably from a different source. Use Overwrite to force update."),'dialog_error.png')
+                        raise NotGoingToDownload(_("AutomatedFanFicFare doesn't recognize chapters in existing epub, epub is probably from a different source. Use Overwrite to force update."),'dialog_error.png')
 
                 if not (book['collision'] == UPDATEALWAYS and chaptercount == urlchaptercount) \
                         and adapter.getConfig("do_update_hook"):

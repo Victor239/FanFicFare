@@ -133,7 +133,7 @@ imagetypes = {
 PLUGIN_ICONS = ['images/icon.png']
 
 
-class FanFicFarePlugin(InterfaceAction):
+class AutomatedFanFicFarePlugin(InterfaceAction):
 
     name = 'AutomatedFanFicFare'
 
@@ -143,7 +143,7 @@ class FanFicFarePlugin(InterfaceAction):
     # keyboard shortcuts, so try to use an unusual/unused shortcut.
     # (text, icon_path, tooltip, keyboard shortcut)
     # icon_path isn't in the zip--icon loaded below.
-    action_spec = (_('FanFicFare'), None,
+    action_spec = (_('AutomatedFanFicFare'), None,
                    _('Download FanFiction stories from various web sites'), ())
     # None for keyboard shortcut doesn't allow shortcut.  () does, there just isn't one yet
 
@@ -169,13 +169,13 @@ class FanFicFarePlugin(InterfaceAction):
         # We use our own get_icon, originally inherited from kiwidude,
         # later extended to allow new cal6 theming of plugins.
         # For theme creators, use:
-        # FanFicFare/images/icon.png
+        # AutomatedFanFicFare/images/icon.png
         # (optionally)
-        # FanFicFare/images/icon-for-dark-theme.png
-        # FanFicFare/images/icon-for-light-theme.png
+        # AutomatedFanFicFare/images/icon-for-dark-theme.png
+        # AutomatedFanFicFare/images/icon-for-light-theme.png
         icon = get_icon('images/icon.png')
 
-        self.qaction.setText(_('FanFicFare'))
+        self.qaction.setText(_('AutomatedFanFicFare'))
 
         # The qaction is automatically created from the action_spec defined
         # above
@@ -476,16 +476,16 @@ class FanFicFarePlugin(InterfaceAction):
                                                                        shortcut_name=_('Edit personal.ini'),
                                                                        triggered=self.editpersonalini)
 
-                self.config_action = self.create_menu_item_ex(self.menu, _('&Configure FanFicFare'),
+                self.config_action = self.create_menu_item_ex(self.menu, _('&Configure AutomatedFanFicFare'),
                                                               image= 'config.png',
-                                                              unique_name='Configure FanFicFare',
-                                                              shortcut_name=_('Configure FanFicFare'),
+                                                              unique_name='Configure AutomatedFanFicFare',
+                                                              shortcut_name=_('Configure AutomatedFanFicFare'),
                                                               triggered=do_user_config)
 
-                self.about_action = self.create_menu_item_ex(self.menu, _('About FanFicFare'),
+                self.about_action = self.create_menu_item_ex(self.menu, _('About AutomatedFanFicFare'),
                                                              image= 'images/icon.png',
-                                                             unique_name='About FanFicFare',
-                                                             shortcut_name=_('About FanFicFare'),
+                                                             unique_name='About AutomatedFanFicFare',
+                                                             shortcut_name=_('About AutomatedFanFicFare'),
                                                              triggered=self.about)
 
             self.gui.keyboard.finalize()
@@ -509,7 +509,7 @@ class FanFicFarePlugin(InterfaceAction):
         d = IniTextDialog(self.gui,
                           prefs['personal.ini'],
                           #icon=get_icon('images/icon.png'),
-                          title=_("FanFicFare"),
+                          title=_("AutomatedFanFicFare"),
                           label=_("Edit personal.ini"),
                           use_find=True,
                           save_size_name='fff:personal.ini')
@@ -576,7 +576,7 @@ class FanFicFarePlugin(InterfaceAction):
     def check_valid_collision(self,extraoptions):
         collision = extraoptions.get('collision',None)
         if collision == CALIBREONLYSAVECOL and not prefs['savemetacol']:
-            s=_('FanFicFare Saved Metadata Column not configured.')
+            s=_('AutomatedFanFicFare Saved Metadata Column not configured.')
             info_dialog(self.gui, s, s, show=True, show_copy_button=False)
             extraoptions['collision'] = CALIBREONLY
             return
@@ -589,7 +589,7 @@ class FanFicFarePlugin(InterfaceAction):
 
     def get_urls_from_imap_menu(self,checked,extraoptions={}):
         if not (prefs['imapserver'] and prefs['imapuser'] and prefs['imapfolder']):
-            s=_('FanFicFare Email Settings are not configured.')
+            s=_('AutomatedFanFicFare Email Settings are not configured.')
             info_dialog(self.gui, s, s, show=True, show_copy_button=False)
             return
         self.check_valid_collision(extraoptions)
@@ -623,11 +623,11 @@ class FanFicFarePlugin(InterfaceAction):
             error_dialog(self.gui,
                          _("Error Fetching Email"),
                          "<p><b>"+
-                         _("An error has occurred while FanFicFare was fetching email.")+
+                         _("An error has occurred while AutomatedFanFicFare was fetching email.")+
                          "</b></p><p>"+
                          _("If it was an authentication error, be aware:")+
                          "<ul><li>"+
-                         _("Microsoft mail servers such as live.com, outlook.com and hotmail.com no longer allow third party apps like FanFicFare.")+
+                         _("Microsoft mail servers such as live.com, outlook.com and hotmail.com no longer allow third party apps like AutomatedFanFicFare.")+
                          "</li><li>"+
                          _("Gmail requires Two Factor Authentication and <a href='https://support.google.com/accounts/answer/185833#app-passwords'>Google App Passwords</a>.")+
                          "</li><li>"+
@@ -930,7 +930,7 @@ class FanFicFarePlugin(InterfaceAction):
                 self.gui.iactions['Remove Books'].do_library_delete(d.get_reject_list_ids())
 
         else:
-            message="<p>"+_("Rejecting FanFicFare URLs: None of the books selected have FanFiction URLs.")+"</p><p>"+_("Proceed to Remove?")+"</p>"
+            message="<p>"+_("Rejecting AutomatedFanFicFare URLs: None of the books selected have FanFiction URLs.")+"</p><p>"+_("Proceed to Remove?")+"</p>"
             if confirm(message,'fff_reject_non_fanfiction', self.gui):
                 self.gui.iactions['Remove Books'].delete_books()
 
@@ -1021,7 +1021,7 @@ class FanFicFarePlugin(InterfaceAction):
         except NotAnthologyException:
             # using an exception purely to get outside 'with busy_cursor:'
             info_dialog(self.gui, _("Cannot Update Anthology"),
-                        "<p>"+_("Cannot Update Anthology")+"</p><p>"+_("Book isn't an FanFicFare Anthology or contains book(s) without valid Story URLs."),
+                        "<p>"+_("Cannot Update Anthology")+"</p><p>"+_("Book isn't an AutomatedFanFicFare Anthology or contains book(s) without valid Story URLs."),
                         show=True,
                         show_copy_button=False)
             remove_dir(tdir)
@@ -1792,7 +1792,7 @@ class FanFicFarePlugin(InterfaceAction):
                         elif chaptercount > urlchaptercount and not (collision == UPDATEALWAYS and adapter.getConfig('force_update_epub_always')):
                             raise NotGoingToDownload(_("Existing epub contains %d chapters, web site only has %d. Use Overwrite or force_update_epub_always to force update.") % (chaptercount,urlchaptercount),'dialog_error.png')
                         elif chaptercount == 0:
-                            raise NotGoingToDownload(_("FanFicFare doesn't recognize chapters in existing epub, epub is probably from a different source. Use Overwrite to force update."),'dialog_error.png')
+                            raise NotGoingToDownload(_("AutomatedFanFicFare doesn't recognize chapters in existing epub, epub is probably from a different source. Use Overwrite to force update."),'dialog_error.png')
 
                 if collision == OVERWRITE and \
                         db.has_format(book_id,formmapping[fileform],index_is_id=True):
@@ -2000,7 +2000,7 @@ class FanFicFarePlugin(InterfaceAction):
         job.reconsolidate=prefs['reconsolidate_jobs']  # YYY batch update
 
         self.gui.jobs_pointer.start()
-        self.do_status_message(_('Starting %d FanFicFare Downloads')%len(book_list),3000)
+        self.do_status_message(_('Starting %d AutomatedFanFicFare Downloads')%len(book_list),3000)
 
     def do_mark_series_anthologies(self,mark_anthology_ids):
         if prefs['mark_series_anthologies'] and mark_anthology_ids:
@@ -2018,8 +2018,8 @@ class FanFicFarePlugin(InterfaceAction):
             self.gui.search.set_search_string('marked:' + marked_text)
             # Sort by our marked column to display the books in order
             self.gui.library_view.sort_by_named_field('marked', True)
-            message=_('FanFicFare is marking and showing matching Anthology Books')+"\n\n"+ \
-                _('To disable, uncheck the "Mark Matching Anthologies?" setting in FanFicFare configuration.')
+            message=_('AutomatedFanFicFare is marking and showing matching Anthology Books')+"\n\n"+ \
+                _('To disable, uncheck the "Mark Matching Anthologies?" setting in AutomatedFanFicFare configuration.')
             confirm(message,'fff_mark_series_anthologies', self.gui, show_cancel_button=False, title=_("Info"), pixmap='dialog_information.png')
 
     def get_custom_col_label(self,col):
@@ -2068,9 +2068,9 @@ class FanFicFarePlugin(InterfaceAction):
                         logger.error("Error Updating Metadata:\n%s"%det_msg)
                         error_dialog(self.gui,
                                      _("Error Updating Metadata"),
-                                     "<p>"+_("An error has occurred while FanFicFare was updating calibre's metadata for <a href='%s'>%s</a>.")%(book['url'],book['title'])+"</p>"+
+                                     "<p>"+_("An error has occurred while AutomatedFanFicFare was updating calibre's metadata for <a href='%s'>%s</a>.")%(book['url'],book['title'])+"</p>"+
                                      "<p>"+_("The ebook has been updated, but the metadata has not.")+"</p>"+
-                                     ("<p><b>"+_("FanFicFare will try to update metadata again once. Close any interfering programs (such as Windows File Explorer) before closing this dialog.")+"</b></p>" if first else ""),
+                                     ("<p><b>"+_("AutomatedFanFicFare will try to update metadata again once. Close any interfering programs (such as Windows File Explorer) before closing this dialog.")+"</b></p>" if first else ""),
                                      det_msg=det_msg,
                                      show=True)
         except Exception as e:
@@ -2078,7 +2078,7 @@ class FanFicFarePlugin(InterfaceAction):
             det_msg = "".join(traceback.format_exception(*sys.exc_info())) # +"\n"+_("Story Details:")+pretty_book(book)
             error_dialog(self.gui,
                          _("Error Updating Metadata"),
-                         "<p>"+_("An error has occurred while FanFicFare was updating calibre's metadata for <a href='%s'>%s</a>.")%(book['url'],book['title'])+"</p>",
+                         "<p>"+_("An error has occurred while AutomatedFanFicFare was updating calibre's metadata for <a href='%s'>%s</a>.")%(book['url'],book['title'])+"</p>",
                          det_msg=det_msg,
                          show=True)
 
@@ -2239,14 +2239,14 @@ class FanFicFarePlugin(InterfaceAction):
 
         payload = (good_list, bad_list, options)
 
-        msgl = [ _('FanFicFare found <b>%s</b> good and <b>%s</b> bad updates.')%(len(good_list),len(bad_list)) ]
+        msgl = [ _('AutomatedFanFicFare found <b>%s</b> good and <b>%s</b> bad updates.')%(len(good_list),len(bad_list)) ]
         if chapter_error_list:
             message = _('Some of the stories downloaded have chapters errors.  Click View Log in the next dialog to see which.')
             confirm(message,'fff_chapter_errors', self.gui, show_cancel_button=False, title=_("Warning"))
             msgl.append(_('<b>%s</b> good stories contain chapter errors.')%len(chapter_error_list))
         if merge:
             if len(good_list) < 1:
-                info_dialog(self.gui, _('FanFicFare: ')+_('No Good Stories for Anthology'),
+                info_dialog(self.gui, _('AutomatedFanFicFare: ')+_('No Good Stories for Anthology'),
                             ## where -> were -- typo kept to not invalidate existing translation.
                             ## should fix if it ever changes for other reasons.  See #1011
                             _('No good stories/updates where downloaded, Anthology creation/update aborted.'),
@@ -2323,10 +2323,10 @@ class FanFicFarePlugin(InterfaceAction):
 
         self.gui.proceed_question(proceed_func,
                                   payload, htmllog,
-                                  _('FanFicFare log'), _('FanFicFare download complete'),
+                                  _('AutomatedFanFicFare log'), _('AutomatedFanFicFare download complete'),
                                   msg,
                                   show_copy_button=False,
-                                  log_viewer_unique_name="FanFicFare log viewer")
+                                  log_viewer_unique_name="AutomatedFanFicFare log viewer")
 
     def do_download_merge_update(self, payload):
         with busy_cursor():
@@ -2435,7 +2435,7 @@ class FanFicFarePlugin(InterfaceAction):
         good_list = sorted(good_list,key=lambda x : x['listorder'])
         bad_list = sorted(bad_list,key=lambda x : x['listorder'])
 
-        self.do_status_message(_('FanFicFare Adding/Updating books.'))
+        self.do_status_message(_('AutomatedFanFicFare Adding/Updating books.'))
         errorcol_label = self.get_custom_col_label(prefs['errorcol'])
         lastcheckedcol_label = self.get_custom_col_label(prefs['lastcheckedcol'])
 
@@ -2912,7 +2912,7 @@ class FanFicFarePlugin(InterfaceAction):
             rl_plugin = self.gui.iactions['Reading List']
         except:
             if prefs['addtolists'] or prefs['addtoreadlists']:
-                message="<p>"+_("You configured FanFicFare to automatically update Reading Lists, but you don't have the %s plugin installed anymore?")%'Reading List'+"</p>"
+                message="<p>"+_("You configured AutomatedFanFicFare to automatically update Reading Lists, but you don't have the %s plugin installed anymore?")%'Reading List'+"</p>"
                 confirm(message,'fff_no_reading_list_plugin', self.gui, show_cancel_button=False, title=_("Warning"))
             return
 
@@ -2924,7 +2924,7 @@ class FanFicFarePlugin(InterfaceAction):
 
             lists = self.get_clean_reading_lists(prefs['read_lists'])
             if len(lists) < 1 :
-                message="<p>"+_("You configured FanFicFare to automatically update \"To Read\" Reading Lists, but you don't have any lists set?")+"</p>"
+                message="<p>"+_("You configured AutomatedFanFicFare to automatically update \"To Read\" Reading Lists, but you don't have any lists set?")+"</p>"
                 confirm(message,'fff_no_read_lists', self.gui, show_cancel_button=False, title=_("Warning"))
             for l in lists:
                 if l in rl_plugin.get_list_names():
@@ -2935,13 +2935,13 @@ class FanFicFarePlugin(InterfaceAction):
                                   refresh_screen=True)
                 else:
                     if l != '':
-                        message="<p>"+_("You configured FanFicFare to automatically update Reading List '%s', but you don't have a list of that name?")%l+"</p>"
+                        message="<p>"+_("You configured AutomatedFanFicFare to automatically update Reading List '%s', but you don't have a list of that name?")%l+"</p>"
                         confirm(message,'fff_no_reading_list_%s'%l, self.gui, show_cancel_button=False, title=_("Warning"))
 
         if prefs['addtolists'] and (add or (prefs['addtolistsonread'] and prefs['addtoreadlists']) ):
             lists = self.get_clean_reading_lists(prefs['send_lists'])
             if len(lists) < 1 :
-                message="<p>"+_("You configured FanFicFare to automatically update \"Send to Device\" Reading Lists, but you don't have any lists set?")+"</p>"
+                message="<p>"+_("You configured AutomatedFanFicFare to automatically update \"Send to Device\" Reading Lists, but you don't have any lists set?")+"</p>"
                 confirm(message,'fff_no_send_lists', self.gui, show_cancel_button=False, title=_("Warning"))
 
             for l in lists:
@@ -2954,7 +2954,7 @@ class FanFicFarePlugin(InterfaceAction):
                                                 refresh_screen=True)
                 else:
                     if l != '':
-                        message="<p>"+_("You configured FanFicFare to automatically update Reading List '%s', but you don't have a list of that name?")%l+"</p>"
+                        message="<p>"+_("You configured AutomatedFanFicFare to automatically update Reading List '%s', but you don't have a list of that name?")%l+"</p>"
                         confirm(message,'fff_no_reading_list_%s'%l, self.gui, show_cancel_button=False, title=_("Warning"))
         self.gui.library_view.model().refresh_ids(book_ids)
         self.gui.tags_view.recount()

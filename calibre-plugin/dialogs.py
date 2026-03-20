@@ -221,7 +221,7 @@ class AddNewDialog(HotKeyedSizePersistedDialog):
         self.l = QVBoxLayout()
         self.setLayout(self.l)
 
-        self.setWindowTitle('FanFicFare')
+        self.setWindowTitle('AutomatedFanFicFare')
         self.setWindowIcon(icon)
 
         self.merge = self.newmerge = False
@@ -845,7 +845,7 @@ class AboutDialog(QDialog):
         self.label = QLabel(text)
         self.label.setOpenExternalLinks(True)
         self.label.setWordWrap(True)
-        self.setWindowTitle(_('About FanFicFare'))
+        self.setWindowTitle(_('About AutomatedFanFicFare'))
         self.setWindowIcon(icon)
         self.l.addWidget(self.logo, 0, 0)
         self.l.addWidget(self.label, 0, 1)
@@ -1170,7 +1170,7 @@ class AutoUpdateDialog(SizePersistedDialog):
         # Suppress dialogs checkbox
         self.suppress_dialogs = QCheckBox(_('Suppress dialogs'), self)
         self.suppress_dialogs.setToolTip(
-            _('Skip the "FanFicFare download complete" confirmation dialog between cycles, enabling fully unattended operation.'))
+            _('Skip the "AutomatedFanFicFare download complete" confirmation dialog between cycles, enabling fully unattended operation.'))
         self.suppress_dialogs.setChecked(False)
         sched_layout.addWidget(self.suppress_dialogs)
 
