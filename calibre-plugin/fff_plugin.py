@@ -2023,9 +2023,9 @@ class AutomatedFanFicFarePlugin(InterfaceAction):
 
         self.gui.jobs_pointer.start()
         if site:
-            self.do_status_message(_('Starting %d AutomatedFanFicFare Downloads from %s') % (len(book_list), site), 3000)
+            self.do_status_message(_('Starting %d downloads from %s') % (len(book_list), site), 3000)
         else:
-            self.do_status_message(_('Starting %d AutomatedFanFicFare Downloads') % len(book_list), 3000)
+            self.do_status_message(_('Starting %d downloads') % len(book_list), 3000)
 
     def do_mark_series_anthologies(self,mark_anthology_ids):
         if prefs['mark_series_anthologies'] and mark_anthology_ids:
