@@ -196,10 +196,11 @@ class AutomatedFanFicFarePlugin(InterfaceAction):
         self.imap_pass = None
         self.download_job_manager = DownloadJobManager()
 
-        self._auto_update_timer     = None   # QTimer or None; None = idle
-        self._auto_update_id_list   = None   # list[int] calibre book ids
-        self._auto_update_options   = None   # fff options dict
-        self._auto_update_auto_opts = None   # {delay_ms, interval_ms, loop_forever, suppress_dialogs}
+        self._auto_update_timer       = None   # QTimer or None; None = idle
+        self._auto_update_id_list     = None   # list[int] calibre book ids
+        self._auto_update_options     = None   # fff options dict
+        self._auto_update_auto_opts   = None   # {delay_ms, interval_ms, loop_forever, suppress_dialogs}
+        self._auto_update_last_summary = None  # plain-text result summary for suppress_dialogs mode
 
     def initialization_complete(self):
         # otherwise configured hot keys won't work until the menu's
@@ -1218,6 +1219,7 @@ class AutomatedFanFicFarePlugin(InterfaceAction):
             self.stop_auto_update()
             return
 
+        self._auto_update_last_summary = None  # reset before each cycle
         id_list = self._auto_update_id_list
         books = [self.make_book_id_only(x) for x in id_list]
         for j, book in enumerate(books):
@@ -1259,9 +1261,13 @@ class AutomatedFanFicFarePlugin(InterfaceAction):
             self._auto_update_timer.setSingleShot(True)
             self._auto_update_timer.timeout.connect(self._run_auto_update_cycle)
             self._auto_update_timer.start(interval_ms)
-            self.do_status_message(
-                _('Auto-Update: next cycle in %d minute(s).') % max(1, interval_ms // 60000), 5000)
+            summary = self._auto_update_last_summary
+            next_cycle_msg = _('Auto-Update: next cycle in %d minute(s).') % max(1, interval_ms // 60000)
+            msg = ('%s — %s' % (summary, next_cycle_msg)) if summary else next_cycle_msg
+            self.do_status_message(msg, 8000)
         else:
+            if self._auto_update_last_summary:
+                self.do_status_message(_('Auto-Update: %s') % self._auto_update_last_summary, 5000)
             self._run_auto_update_cycle()
 
     def stop_auto_update(self):
@@ -1277,10 +1283,11 @@ class AutomatedFanFicFarePlugin(InterfaceAction):
             self.do_status_message(_('Auto-Update stopped.'), 3000)
 
     def _clear_auto_update_state(self):
-        self._auto_update_timer     = None
-        self._auto_update_id_list   = None
-        self._auto_update_options   = None
-        self._auto_update_auto_opts = None
+        self._auto_update_timer        = None
+        self._auto_update_id_list      = None
+        self._auto_update_options      = None
+        self._auto_update_auto_opts    = None
+        self._auto_update_last_summary = None
 
     ## ----------------------------------------------------------------
 
@@ -2311,6 +2318,20 @@ class AutomatedFanFicFarePlugin(InterfaceAction):
     def do_proceed_question(self, update_func, payload, htmllog, msgl):
         if (self._auto_update_auto_opts or {}).get('suppress_dialogs', False):
             update_func(payload)
+            # Build a plain-text result summary from good_list / bad_list
+            if isinstance(payload, tuple) and len(payload) >= 2:
+                from collections import Counter
+                good_list, bad_list = payload[0], payload[1]
+                parts = []
+                if good_list:
+                    counts = Counter(b.get('status','') for b in good_list)
+                    detail = ', '.join('%d %s' % (n, s) for s, n in sorted(counts.items()))
+                    parts.append(_('%d updated (%s)') % (len(good_list), detail))
+                if bad_list:
+                    counts = Counter(b.get('status','') for b in bad_list)
+                    detail = ', '.join('%d %s' % (n, s) for s, n in sorted(counts.items()))
+                    parts.append(_('%d failed (%s)') % (len(bad_list), detail))
+                self._auto_update_last_summary = '; '.join(parts) if parts else _('no changes')
             self.download_finished_signal.emit()
             return
 
