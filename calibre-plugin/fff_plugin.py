@@ -1057,7 +1057,7 @@ class AutomatedFanFicFarePlugin(InterfaceAction):
     def prep_anthology_downloads(self, options, update_books,
                                  merge=False, urlmapfile=None):
         # new question_cache each time we start prep'ing downloads.
-        self.question_cache = {}
+        self._reset_question_cache()
         if isinstance(update_books, string_types):
             url_list = split_text_to_urls(update_books)
             update_books = self.convert_urls_to_books(url_list)
@@ -1320,10 +1320,17 @@ class AutomatedFanFicFarePlugin(InterfaceAction):
         logger.debug(retval)
         return retval
 
+    def _reset_question_cache(self):
+        self.question_cache = {}
+        if (self._auto_update_auto_opts or {}).get('suppress_dialogs', False):
+            # Suppressed auto-update runs should behave like a silent "Yes to All"
+            # for adult confirmation prompts.
+            self.question_cache['is_adult'] = True
+
     def prep_downloads(self, options, books, merge=False, extrapayload=None):
         '''Fetch metadata for stories from servers, launch BG job when done.'''
         # new question_cache each time we start prep'ing downloads.
-        self.question_cache = {}
+        self._reset_question_cache()
         if isinstance(books, string_types):
             url_list = split_text_to_urls(books)
             books = self.convert_urls_to_books(url_list)
