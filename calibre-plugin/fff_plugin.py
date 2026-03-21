@@ -199,8 +199,9 @@ class AutomatedFanFicFarePlugin(InterfaceAction):
         self._auto_update_timer       = None   # QTimer or None; None = idle
         self._auto_update_id_list     = None   # list[int] calibre book ids
         self._auto_update_options     = None   # fff options dict
-        self._auto_update_auto_opts   = None   # {delay_ms, interval_ms, loop_forever, suppress_dialogs}
-        self._auto_update_last_summary = None  # plain-text result summary for suppress_dialogs mode
+        self._auto_update_auto_opts      = None   # {delay_ms, interval_ms, loop_forever, suppress_dialogs}
+        self._auto_update_last_summary   = None  # plain-text result summary for suppress_dialogs mode
+        self._auto_update_detail_messages = None  # list of per-status follow-up messages
 
     def initialization_complete(self):
         # otherwise configured hot keys won't work until the menu's
@@ -1256,6 +1257,7 @@ class AutomatedFanFicFarePlugin(InterfaceAction):
             return
 
         interval_ms = auto_opts.get('interval_ms', 0)
+        details = self._auto_update_detail_messages or []
         if interval_ms > 0:
             self._auto_update_timer = QTimer(self.gui)
             self._auto_update_timer.setSingleShot(True)
@@ -1263,12 +1265,24 @@ class AutomatedFanFicFarePlugin(InterfaceAction):
             self._auto_update_timer.start(interval_ms)
             summary = self._auto_update_last_summary
             next_cycle_msg = _('Auto-Update: next cycle in %d minute(s).') % max(1, interval_ms // 60000)
-            msg = ('%s — %s' % (summary, next_cycle_msg)) if summary else next_cycle_msg
-            self.do_status_message(msg, 8000)
+            main = ('Update finished: %s — %s' % (summary, next_cycle_msg)) if summary else next_cycle_msg
+            self.do_status_message(main, 8000)
+            if details:
+                QTimer.singleShot(5000, lambda: self._show_detail_messages(details))
         else:
             if self._auto_update_last_summary:
-                self.do_status_message(_('Auto-Update: %s') % self._auto_update_last_summary, 5000)
+                self.do_status_message(_('Update finished: %s') % self._auto_update_last_summary, 5000)
+                if details:
+                    QTimer.singleShot(4000, lambda: self._show_detail_messages(details))
             self._run_auto_update_cycle()
+
+    def _show_detail_messages(self, messages, interval_ms=5000):
+        '''Show each detail message in sequence, spaced interval_ms apart.'''
+        if not messages:
+            return
+        self.do_status_message(messages[0], interval_ms)
+        if len(messages) > 1:
+            QTimer.singleShot(interval_ms, lambda: self._show_detail_messages(messages[1:], interval_ms))
 
     def stop_auto_update(self):
         '''Cancel any pending auto-update timer and clean up state.'''
@@ -1283,11 +1297,12 @@ class AutomatedFanFicFarePlugin(InterfaceAction):
             self.do_status_message(_('Auto-Update stopped.'), 3000)
 
     def _clear_auto_update_state(self):
-        self._auto_update_timer        = None
-        self._auto_update_id_list      = None
-        self._auto_update_options      = None
-        self._auto_update_auto_opts    = None
-        self._auto_update_last_summary = None
+        self._auto_update_timer           = None
+        self._auto_update_id_list         = None
+        self._auto_update_options         = None
+        self._auto_update_auto_opts       = None
+        self._auto_update_last_summary    = None
+        self._auto_update_detail_messages = None
 
     ## ----------------------------------------------------------------
 
@@ -2320,7 +2335,7 @@ class AutomatedFanFicFarePlugin(InterfaceAction):
             update_func(payload)
             # Build a plain-text result summary from good_list / bad_list
             if isinstance(payload, tuple) and len(payload) >= 2:
-                from collections import Counter
+                from collections import Counter, OrderedDict
                 status_display = {
                     _('Add'):      _('Added'),
                     _('Update'):   _('Updated'),
@@ -2340,6 +2355,15 @@ class AutomatedFanFicFarePlugin(InterfaceAction):
                     detail = ', '.join('%d %s' % (n, s) for s, n in sorted(counts.items()))
                     parts.append(_('%d failed (%s)') % (len(bad_list), detail))
                 self._auto_update_last_summary = '; '.join(parts) if parts else _('No changes')
+                # Build per-status detail messages, good books first then bad
+                status_titles = OrderedDict()
+                for b in (good_list + bad_list):
+                    ds = _display(b.get('status', ''))
+                    status_titles.setdefault(ds, []).append(b.get('title', _('Unknown')))
+                self._auto_update_detail_messages = [
+                    '%d %s: %s' % (len(titles), status, ', '.join(titles))
+                    for status, titles in status_titles.items()
+                ]
             self.download_finished_signal.emit()
             return
 
