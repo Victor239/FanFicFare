@@ -2402,20 +2402,60 @@ class AutomatedFanFicFarePlugin(InterfaceAction):
                 os.environ['CURL_CA_BUNDLE'] = old_curl_ca_bundle
 
     def _format_apprise_body(self, good_list, bad_list):
-        lines = []
+        groups = []
+
+        def get_subgroup(status, comment):
+            if status == _('Skipped'):
+                if comment.startswith(_('Already contains ')):
+                    return _('Already contains all chapters')
+                if _('web site only has') in comment:
+                    return _('Web site has less chapters')
+            return None
+
+        def get_status_group(status):
+            header = '[%s]' % status
+            for entry in groups:
+                if entry['header'] == header:
+                    return entry
+            entry = {'header': header, 'subgroups': []}
+            groups.append(entry)
+            return entry
+
+        def add_line(status, subgroup, line):
+            status_group = get_status_group(status)
+            for entry in status_group['subgroups']:
+                if entry['subgroup'] == subgroup:
+                    entry['lines'].append(line)
+                    return
+            status_group['subgroups'].append({'subgroup': subgroup, 'lines': [line]})
+
         for book in list(good_list) + list(bad_list):
             status = unicode(book.get('status', '')).strip()
-            title = unicode(book.get('title', '')).strip()
-            comment = unicode(book.get('comment', '')).strip()
-            line = '[%s] %s' % (status, title)
+            title = escapehtml(unicode(book.get('title', '')).strip())
+            raw_comment = unicode(book.get('comment', '')).strip()
+            comment = escapehtml(raw_comment)
+            line = '[%s] %s' % (escapehtml(status), title)
             if comment:
                 line += ' - %s' % comment
-            lines.append(line)
+            add_line(status, get_subgroup(status, raw_comment), line)
 
-        if not lines:
+        if not groups:
             return _('No changes.')
 
-        body = '\n'.join(lines)
+        sections = []
+        for index, group in enumerate(groups):
+            if index:
+                sections.append('')
+            sections.append('<b>%s</b>' % escapehtml(group['header']))
+            for subgroup in group['subgroups']:
+                if subgroup['subgroup']:
+                    sections.append('<b>%s</b> - %s' % (
+                        escapehtml(group['header']),
+                        escapehtml(subgroup['subgroup'])))
+                sections.extend(subgroup['lines'])
+                sections.append('')
+
+        body = '\n'.join(sections).strip()
         limit = 4000
         if len(body) > limit:
             continuation = _('\n... truncated')
