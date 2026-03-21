@@ -111,7 +111,7 @@ from calibre_plugins.automatedfanficfare_plugin.dialogs import (
     LoopProgressDialog, UserPassDialog, AboutDialog, CollectURLDialog,
     RejectListDialog, EmailPassDialog, TOTPDialog,
     save_collisions, question_dialog_all,
-    NotGoingToDownload, RejectUrlEntry, IniTextDialog)
+    NotGoingToDownload, RejectUrlEntry, IniTextDialog, time_duration_format)
 
 # because calibre immediately transforms html into zip and don't want
 # to have an 'if html'.  db.has_format is cool with the case mismatch,
@@ -1264,7 +1264,7 @@ class AutomatedFanFicFarePlugin(InterfaceAction):
             self._auto_update_timer.timeout.connect(self._run_auto_update_cycle)
             self._auto_update_timer.start(interval_ms)
             summary = self._auto_update_last_summary
-            next_cycle_msg = _('Auto-Update: next cycle in %d minute(s).') % max(1, interval_ms // 60000)
+            next_cycle_msg = _('Auto-Update: next cycle in %s.') % time_duration_format(interval_ms // 1000, joiner=' and ')
             msg = ('Update finished: %s — %s' % (summary, next_cycle_msg)) if summary else next_cycle_msg
             self.do_status_message(msg, 8000)
         else:
