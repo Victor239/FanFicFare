@@ -2321,17 +2321,25 @@ class AutomatedFanFicFarePlugin(InterfaceAction):
             # Build a plain-text result summary from good_list / bad_list
             if isinstance(payload, tuple) and len(payload) >= 2:
                 from collections import Counter
+                status_display = {
+                    _('Add'):      _('Added'),
+                    _('Update'):   _('Updated'),
+                    _('Meta'):     _('Metadata updates'),
+                    _('Rejected'): _('User Rejected'),
+                }
+                def _display(s):
+                    return status_display.get(s, s)
                 good_list, bad_list = payload[0], payload[1]
                 parts = []
                 if good_list:
-                    counts = Counter(b.get('status','') for b in good_list)
+                    counts = Counter(_display(b.get('status','')) for b in good_list)
                     detail = ', '.join('%d %s' % (n, s) for s, n in sorted(counts.items()))
                     parts.append(_('%d updated (%s)') % (len(good_list), detail))
                 if bad_list:
-                    counts = Counter(b.get('status','') for b in bad_list)
+                    counts = Counter(_display(b.get('status','')) for b in bad_list)
                     detail = ', '.join('%d %s' % (n, s) for s, n in sorted(counts.items()))
                     parts.append(_('%d failed (%s)') % (len(bad_list), detail))
-                self._auto_update_last_summary = '; '.join(parts) if parts else _('no changes')
+                self._auto_update_last_summary = '; '.join(parts) if parts else _('No changes')
             self.download_finished_signal.emit()
             return
 
