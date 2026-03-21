@@ -1133,12 +1133,12 @@ class AutoUpdateDialog(SizePersistedDialog):
         delay_row.addWidget(QLabel(_('Delay first update by:')))
         self.delay_hours = QSpinBox(self)
         self.delay_hours.setRange(0, 168)
-        self.delay_hours.setValue(0)
+        self.delay_hours.setValue(gprefs.get('fff:auto_update_delay_hours', 0))
         self.delay_hours.setSuffix(' h')
         delay_row.addWidget(self.delay_hours)
         self.delay_minutes = QSpinBox(self)
         self.delay_minutes.setRange(0, 59)
-        self.delay_minutes.setValue(0)
+        self.delay_minutes.setValue(gprefs.get('fff:auto_update_delay_minutes', 5))
         self.delay_minutes.setSuffix(' m')
         delay_row.addWidget(self.delay_minutes)
         delay_row.addStretch()
@@ -1149,12 +1149,12 @@ class AutoUpdateDialog(SizePersistedDialog):
         interval_row.addWidget(QLabel(_('Update every:')))
         self.interval_hours = QSpinBox(self)
         self.interval_hours.setRange(0, 168)
-        self.interval_hours.setValue(1)
+        self.interval_hours.setValue(gprefs.get('fff:auto_update_interval_hours', 8))
         self.interval_hours.setSuffix(' h')
         interval_row.addWidget(self.interval_hours)
         self.interval_minutes = QSpinBox(self)
         self.interval_minutes.setRange(0, 59)
-        self.interval_minutes.setValue(0)
+        self.interval_minutes.setValue(gprefs.get('fff:auto_update_interval_minutes', 0))
         self.interval_minutes.setSuffix(' m')
         interval_row.addWidget(self.interval_minutes)
         interval_row.addStretch()
@@ -1164,14 +1164,14 @@ class AutoUpdateDialog(SizePersistedDialog):
         self.loop_forever = QCheckBox(_('Loop forever'), self)
         self.loop_forever.setToolTip(
             _('After each update completes, wait the interval above and repeat automatically.'))
-        self.loop_forever.setChecked(False)
+        self.loop_forever.setChecked(gprefs.get('fff:auto_update_loop_forever', False))
         sched_layout.addWidget(self.loop_forever)
 
         # Suppress dialogs checkbox
         self.suppress_dialogs = QCheckBox(_('Suppress dialogs'), self)
         self.suppress_dialogs.setToolTip(
             _('Skip the "AutomatedFanFicFare download complete" confirmation dialog between cycles, enabling fully unattended operation.'))
-        self.suppress_dialogs.setChecked(False)
+        self.suppress_dialogs.setChecked(gprefs.get('fff:auto_update_suppress_dialogs', False))
         sched_layout.addWidget(self.suppress_dialogs)
 
         layout.addWidget(sched_group)
@@ -1184,6 +1184,15 @@ class AutoUpdateDialog(SizePersistedDialog):
 
         self.resize_dialog()
         self.books_table.populate_table(books)
+
+    def accept(self):
+        gprefs['fff:auto_update_delay_hours']      = self.delay_hours.value()
+        gprefs['fff:auto_update_delay_minutes']    = self.delay_minutes.value()
+        gprefs['fff:auto_update_interval_hours']   = self.interval_hours.value()
+        gprefs['fff:auto_update_interval_minutes'] = self.interval_minutes.value()
+        gprefs['fff:auto_update_loop_forever']     = self.loop_forever.isChecked()
+        gprefs['fff:auto_update_suppress_dialogs'] = self.suppress_dialogs.isChecked()
+        SizePersistedDialog.accept(self)
 
     def click_show_download_options(self, x):
         self.gbf.setVisible(x)
