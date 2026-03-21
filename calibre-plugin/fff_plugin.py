@@ -2599,6 +2599,13 @@ class AutomatedFanFicFarePlugin(InterfaceAction):
         except Exception as e:
             raise_exception(meta,val,label,e)
 
+    def _get_raw_custom_date_value(self, book, meta):
+        return {
+            'datePublished': book.get('pubdate'),
+            'dateUpdated': book.get('updatedate'),
+            'dateCreated': book.get('timestamp'),
+        }.get(meta)
+
     def update_metadata(self, db, book_id, book, mi, options):
         oldmi = db.get_metadata(book_id,index_is_id=True)
         if prefs['keeptags']:
@@ -2692,7 +2699,13 @@ class AutomatedFanFicFarePlugin(InterfaceAction):
                 continue
             label = coldef['label']
             if coldef['datatype'] in ('enumeration','comments','datetime','series'):
-                self.set_custom(db, book_id, meta, book['all_metadata'][meta], label, commit=False)
+                val = book['all_metadata'][meta]
+                if coldef['datatype'] == 'datetime':
+                    val = self._get_raw_custom_date_value(book, meta)
+                    if not val:
+                        logger.debug("No raw datetime value for %s, skipping custom column(%s) update."%(meta,coldef['name']))
+                        continue
+                self.set_custom(db, book_id, meta, val, label, commit=False)
             elif coldef['datatype'] == 'text':
                 joined_val = book['all_metadata'][meta]
                 # 'Contains names' custom columns need & separators.
@@ -2771,6 +2784,8 @@ class AutomatedFanFicFarePlugin(InterfaceAction):
                                         val = sum(items)
                             else:
                                 val = unicode(val).replace(",","")
+                        elif coldef['datatype'] == 'datetime':
+                            val = self._get_raw_custom_date_value(book, meta)
                         else:
                             val = val
                         if coldef['datatype'] == 'bool':
@@ -2781,7 +2796,7 @@ class AutomatedFanFicFarePlugin(InterfaceAction):
                             else:
                                 val = None # for tri-state 'booleans'. Yes/No/Null
                         # logger.debug("setting 'r' or 'added':meta:%s label:%s val:%s"%(meta,label,val))
-                        if val != '':
+                        if val not in ('', None):
                             self.set_custom(db, book_id, meta, val, label=label, commit=False)
 
                     if flag == 'a':
