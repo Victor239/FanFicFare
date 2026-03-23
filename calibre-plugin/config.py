@@ -1540,8 +1540,8 @@ class CustomColumnsTab(QWidget):
         self.l.addLayout(horz)
 
         horz = QHBoxLayout()
-        label = QLabel(_("Last Checked Column:"))
-        tooltip=_("Record the last time AutomatedFanFicFare updated or checked for updates.\n(Date columns only.)")
+        label = QLabel(_("Last Successful Update Column:"))
+        tooltip=_("Record the date and time of the last successful download or metadata update.\n(Date columns only.)")
         label.setToolTip(tooltip)
         horz.addWidget(label)
 
