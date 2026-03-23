@@ -2134,6 +2134,9 @@ class AutomatedFanFicFarePlugin(InterfaceAction):
         if len(update_list):
             self.gui.library_view.model().refresh_ids(update_ids)
 
+        if all_ids:
+            self.gui.library_view.model().resort()
+
         current = self.gui.library_view.currentIndex()
         self.gui.library_view.model().current_changed(current, self.previous)
         self.gui.tags_view.recount()
