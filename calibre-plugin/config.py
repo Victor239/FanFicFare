@@ -1351,7 +1351,7 @@ permitted_values = {
     'int' : ['numWords','numChapters'],
     'float' : ['numWords','numChapters'],
     'bool' : ['status-C','status-I'],
-    'datetime' : ['datePublished', 'dateUpdated', 'dateCreated'],
+    'datetime' : ['datePublished', 'dateUpdated', 'datePackaged'],
     'series' : ['series'],
     'enumeration' : ['category',
                      'genre',
@@ -1362,7 +1362,7 @@ permitted_values = {
                      'status',
                      'datePublished',
                      'dateUpdated',
-                     'dateCreated',
+                     'datePackaged',
                      'rating',
                      'warnings',
                      'numChapters',
@@ -1399,7 +1399,7 @@ titleLabels = {
     'ships':_('Relationships'),
     'datePublished':_('Published'),
     'dateUpdated':_('Updated'),
-    'dateCreated':_('Created'),
+    'datePackaged':_('Packaged'),
     'rating':_('Rating'),
     'warnings':_('Warnings'),
     'numChapters':_('Chapters'),
@@ -1559,6 +1559,7 @@ class CustomColumnsTab(QWidget):
         horz.addWidget(label) # empty spacer for alignment with error column line.
 
         self.l.addLayout(horz)
+
 
 
 class StandardColumnsTab(QWidget):
