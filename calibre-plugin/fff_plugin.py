@@ -44,7 +44,7 @@ from PyQt5.Qt import (QApplication, QMenu, QTimer, QToolButton, pyqtSignal, QEve
 from calibre.ptempfile import PersistentTemporaryFile, PersistentTemporaryDirectory, remove_dir
 from calibre.ebooks.metadata import MetaInformation
 from calibre.ebooks.metadata.meta import get_metadata as calibre_get_metadata
-from calibre.gui2 import error_dialog, info_dialog, question_dialog
+from calibre.gui2 import error_dialog, info_dialog, question_dialog, gprefs
 from calibre.gui2.dialogs.message_box import ViewLog
 from calibre.gui2.dialogs.confirm_delete import confirm
 from calibre.utils.config import prefs as calibre_prefs
@@ -196,12 +196,16 @@ class AutomatedFanFicFarePlugin(InterfaceAction):
         self.imap_pass = None
         self.download_job_manager = DownloadJobManager()
 
-        self._auto_update_timer       = None   # QTimer or None; None = idle
-        self._auto_update_id_list     = None   # list[int] calibre book ids
-        self._auto_update_options     = None   # fff options dict
+        self._auto_update_timer        = None   # QTimer or None; None = idle
+        self._auto_update_id_list      = None   # list[int] calibre book ids
+        self._auto_update_options      = None   # fff options dict
         self._auto_update_auto_opts    = None   # {delay_ms, interval_ms, loop_forever, suppress_dialogs}
         self._auto_update_last_summary = None  # plain-text result summary for suppress_dialogs mode
         self._auto_update_htmllog      = None  # HTML log from last suppress_dialogs cycle
+        try:
+            self._auto_update_last_id_list = gprefs.get('fff:auto_update_last_id_list', None) or None
+        except Exception:
+            self._auto_update_last_id_list = None
 
     def initialization_complete(self):
         # otherwise configured hot keys won't work until the menu's
@@ -315,6 +319,23 @@ class AutomatedFanFicFarePlugin(InterfaceAction):
                 unique_name='Stop Auto-Update FanFiction Books',
                 triggered=lambda checked: self.stop_auto_update())
             self.stop_auto_update_action.setVisible(self._auto_update_timer is not None)
+
+            self.update_early_action = self.create_menu_item_ex(
+                self.menu,
+                _('Update &Early'),
+                image='plusplus.png',
+                unique_name='Update Early Auto-Update FanFiction Books',
+                triggered=lambda checked: self.update_early())
+            self.update_early_action.setVisible(self._auto_update_timer is not None)
+
+            self.same_selection_auto_update_action = self.create_menu_item_ex(
+                self.menu,
+                _('&Same Selection Auto-Update'),
+                image='plusplus.png',
+                unique_name='Same Selection Auto-Update FanFiction Books',
+                triggered=lambda checked: self.same_selection_auto_update())
+            self.same_selection_auto_update_action.setVisible(
+                self._auto_update_timer is None and self._auto_update_last_id_list is not None)
 
             self.get_list_imap_action = self.create_menu_item_ex(self.menu, _('Get Story URLs from &Email'), image='view.png',
                                                                  unique_name='Get Story URLs from IMAP',
@@ -1197,6 +1218,8 @@ class AutomatedFanFicFarePlugin(InterfaceAction):
         if not any(x['good'] for x in update_books):
             return
 
+        self._auto_update_last_id_list = id_list
+        gprefs['fff:auto_update_last_id_list'] = id_list
         self._auto_update_id_list   = id_list
         self._auto_update_options   = d.get_fff_options()
         self._auto_update_auto_opts = d.get_auto_options()
@@ -1275,6 +1298,21 @@ class AutomatedFanFicFarePlugin(InterfaceAction):
             d = ViewLog(_('AutomatedFanFicFare log'), htmllog, parent=self.gui)
             d.setWindowIcon(get_icon('bookmarks.png'))
             d.show()
+
+    def update_early(self):
+        '''Cancel the pending timer and run the auto-update cycle immediately.
+        Rescheduling after the cycle follows the normal _on_auto_update_done() logic.'''
+        if self._auto_update_timer is None:
+            return
+        self._auto_update_timer.stop()
+        self._run_auto_update_cycle()
+
+    def same_selection_auto_update(self):
+        '''Start auto-update using the most recently used book selection.'''
+        if self._auto_update_last_id_list is None:
+            self.do_status_message(_('No previous selection available.'), 3000)
+            return
+        self.auto_update_dialog(None, id_list=self._auto_update_last_id_list)
 
     def stop_auto_update(self):
         '''Cancel any pending auto-update timer and clean up state.'''
