@@ -202,6 +202,7 @@ class AutomatedFanFicFarePlugin(InterfaceAction):
         self._auto_update_auto_opts    = None   # {delay_ms, interval_ms, loop_forever, suppress_dialogs}
         self._auto_update_last_summary = None  # plain-text result summary for suppress_dialogs mode
         self._auto_update_htmllog      = None  # HTML log from last suppress_dialogs cycle
+        self._count_pages_original_ask_confirm = None  # saved Count Pages ask-for-confirm value
         try:
             self._auto_update_last_id_list = gprefs.get('fff:auto_update_last_id_list', None) or None
         except Exception:
@@ -1338,6 +1339,14 @@ class AutomatedFanFicFarePlugin(InterfaceAction):
         self._auto_update_auto_opts    = None
         self._auto_update_last_summary = None
         self._auto_update_htmllog      = None
+        if self._count_pages_original_ask_confirm is not None:
+            try:
+                import calibre_plugins.count_pages.config as cp_cfg
+                cp_cfg.plugin_prefs[cp_cfg.STORE_NAME][cp_cfg.KEY_ASK_FOR_CONFIRMATION] = \
+                    self._count_pages_original_ask_confirm
+            except Exception:
+                pass
+            self._count_pages_original_ask_confirm = None
 
     ## ----------------------------------------------------------------
 
@@ -2229,6 +2238,21 @@ class AutomatedFanFicFarePlugin(InterfaceAction):
             countpagesstats = list(prefs['countpagesstats']) # copy because we're changing it.
             # print("all_ids:%s"%all_ids)
             # print("countpagesstats:%s"%countpagesstats)
+
+            ## In suppress_dialogs mode disable Count Pages' "Ask for confirmation"
+            ## dialog so unattended updates run without blocking.  The original value
+            ## is restored when the auto-update session ends (_clear_auto_update_state).
+            if (self._auto_update_auto_opts or {}).get('suppress_dialogs', False):
+                try:
+                    import calibre_plugins.count_pages.config as cp_cfg
+                    orig = cp_cfg.plugin_prefs[cp_cfg.STORE_NAME].get(
+                               cp_cfg.KEY_ASK_FOR_CONFIRMATION, False)
+                    if orig:
+                        if self._count_pages_original_ask_confirm is None:
+                            self._count_pages_original_ask_confirm = orig
+                        cp_cfg.plugin_prefs[cp_cfg.STORE_NAME][cp_cfg.KEY_ASK_FOR_CONFIRMATION] = False
+                except Exception:
+                    pass
 
             ## If only some of the books need word counting, they'll
             ## have to be launched separately.
