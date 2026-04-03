@@ -1244,6 +1244,11 @@ class AutomatedFanFicFarePlugin(InterfaceAction):
             return
 
         self._auto_update_last_summary = None  # reset before each cycle
+        # Clear state that must not persist across cycles:
+        # - basic_cache: stale HTTP responses would mask newly-added chapters
+        # - uniqueurls: accumulated set would falsely skip all books in cycle 2+
+        self._auto_update_options.pop('basic_cache', None)
+        self._auto_update_options.pop('uniqueurls', None)
         id_list = self._auto_update_id_list
         books = [self.make_book_id_only(x) for x in id_list]
         for j, book in enumerate(books):
