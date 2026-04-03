@@ -2311,6 +2311,7 @@ class AutomatedFanFicFarePlugin(InterfaceAction):
         if job.reconsolidate: # YYY batch update
             if batch.all_done():
                 book_list = batch.get_results()
+                self.download_job_manager.remove_batch(tdir)
             else:
                 return
         else:
